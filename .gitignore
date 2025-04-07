@@ -1,0 +1,4 @@
+.env
+__pycache__/
+*.pyc
+sent_programs_*.json
