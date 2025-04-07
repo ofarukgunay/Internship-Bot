@@ -105,9 +105,9 @@ To make the bot run automatically every 15 minutes, you can:
 
 ```
 Internship-Bot/
-├── bot.py               => Main bot script
+├── main.py              => Main bot script
 ├── requirements.txt     => Required Python packages
-├── .env.example         => Template for environment variables
+├── .env                 => Template for environment variables
 ├── .gitignore           => Files to ignore in Git
 └── README.md            => You’re here!
 ```
