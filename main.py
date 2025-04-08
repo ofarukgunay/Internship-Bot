@@ -61,11 +61,11 @@ def get_vizyonergenç_programs():
 
     # Step 2: Click on "Giriş Yap" button (top right)
     try:
-        # Giriş yap / Kayıt ol butonunu tıklıyoruz
+        # Wait for the button to be clickable and then click it
         login_trigger = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "login-trigger")))
         login_trigger.click()
         print("✅ Clicked 'Giriş Yap / Kayıt Ol' button")
-        time.sleep(2)  # Modalın açılmasını bekle
+        time.sleep(2)  # Wait for the modal to appear
     except Exception as e:
         print("❌ Couldn't click login modal trigger:", e)
         driver.quit()
