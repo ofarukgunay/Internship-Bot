@@ -35,6 +35,49 @@ pip install -r requirements.txt
 
 ---
 
+## 🤖 How to Create a Telegram Bot and Get the Token
+ 
+ 1. Open Telegram and search for [@BotFather](https://t.me/BotFather)
+ 2. Start a chat and send `/newbot`
+ 3. Choose a name and a username (must end with `bot`, e.g., `myinternshipbot`)
+ 4. BotFather will give you a token like:
+ 
+ ```
+ 123456789:ABCdefGHIjklMNOpqrSTUvwxYZ
+ ```
+ 
+ Copy and paste this token into your `.env` file as `TELEGRAM_BOT_TOKEN`.
+ 
+ ---
+ 
+ ## 💬 How to Find Your Chat ID
+ 
+ ### For personal use
+ 
+ 1. Search for [@userinfobot](https://t.me/userinfobot) on Telegram
+ 2. Start the chat and it will show your user ID, like:
+ 
+ ```
+ Your chat ID: 123456789
+ ```
+ 
+ Use this number as `TELEGRAM_CHAT_ID`.
+ 
+ ### For groups
+ 
+ 1. Add your bot to the group
+ 2. Send a message in the group
+ 3. Go to this URL in your browser (replace with your actual token):
+ 
+ ```
+ https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates
+ ```
+ 
+ 4. Look in the JSON for `"chat": {"id": ...}` — that's your group chat ID.  
+ It usually starts with `-100`.
+ 
+ ---
+ 
 ### 3. Set Up the Environment Variables
 Create a `.env` file in the root directory and add your configuration:
 
