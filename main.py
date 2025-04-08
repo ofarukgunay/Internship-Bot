@@ -3,6 +3,15 @@ from bs4 import BeautifulSoup
 import os
 import json
 from dotenv import load_dotenv
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+import time
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 
 # Load environment variables
 load_dotenv()
@@ -32,22 +41,83 @@ def get_youthall_programs():
         return program_list
     return []
 
+import requests
+
 def get_vizyonergenç_programs():
-    """Scrape internship posts from Vizyoner Genç"""
-    url = "https://vizyonergenc.com/ilanlar"
-    response = requests.get(url)
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, "html.parser")
-        ilanlar = soup.find_all("a", class_="card card-list card-hover")
-        program_list = []
+    USER_EMAIL = os.getenv("VIZYONER_EMAIL")
+    USER_PASSWORD = os.getenv("VIZYONER_PASSWORD")
 
-        for ilan in ilanlar:
-            title = ilan.find("h5").get_text(strip=True)
-            link = "https://vizyonergenc.com" + ilan["href"]
-            program_list.append({"title": title, "link": link})
+    options = Options()
+    options.headless = False  # testte açık bırak
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
 
-        return program_list
-    return []
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    wait = WebDriverWait(driver, 15)
+
+    # Step 1: Go to home page
+    driver.get("https://vizyonergenc.com")
+    time.sleep(2)
+
+    # Step 2: Click on "Giriş Yap" button (top right)
+    try:
+        # Giriş yap / Kayıt ol butonunu tıklıyoruz
+        login_trigger = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "login-trigger")))
+        login_trigger.click()
+        print("✅ Clicked 'Giriş Yap / Kayıt Ol' button")
+        time.sleep(2)  # Modalın açılmasını bekle
+    except Exception as e:
+        print("❌ Couldn't click login modal trigger:", e)
+        driver.quit()
+        return []
+
+
+    # Step 3: Fill login modal
+    try:
+        email_input = wait.until(EC.presence_of_element_located((By.NAME, "email")))
+        password_input = wait.until(EC.presence_of_element_located((By.NAME, "password")))
+
+        email_input.send_keys(USER_EMAIL)
+        password_input.send_keys(USER_PASSWORD)
+
+        # Use the actual login button by ID
+        login_button = wait.until(EC.element_to_be_clickable((By.ID, "loginButton")))
+        login_button.click()
+        print("✅ Clicked 'Giriş Yap' button")
+        time.sleep(3)
+    except Exception as e:
+        print("Login failed:", e)
+        driver.quit()
+        return []
+
+    # Step 4: Go to listings page
+    driver.get("https://vizyonergenc.com/ilanlar")
+    time.sleep(3)
+
+    # Step 5: Filter for internship listings
+    try:
+        staj_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Staj İlanları')]")))
+        staj_button.click()
+        time.sleep(3)
+    except Exception as e:
+        print("Could not click Staj İlanları:", e)
+
+    # Step 6: Scrape listings
+    program_list = []
+    cards = driver.find_elements(By.CLASS_NAME, "job-listing")
+
+    for card in cards:
+        try:
+            title = card.find_element(By.CLASS_NAME, "job-listing-title").text
+            href = card.get_attribute("href")
+            if "(Staj)" in title and href:
+                program_list.append({"title": title, "link": href})
+        except:
+            continue
+
+    driver.quit()
+    return program_list
+
 
 def send_telegram_notification(message):
     """Send a message via Telegram bot"""
@@ -105,3 +175,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+for p in get_vizyonergenç_programs():
+    print(p)
